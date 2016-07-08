@@ -35,8 +35,8 @@ func main() {
 	fmt.Println("Roshan Private Key : ", roshanPrivateKey)
 	fmt.Println("Roshan Public key ", roshanPublicKey)
 
-	//Encrypt pim Message
-	message := []byte("the code must be like a piece of music")
+	//Encrypt pim's Message
+	message := []byte("Hi Roshan")
 	label := []byte("")
 	hash := sha256.New()
 
