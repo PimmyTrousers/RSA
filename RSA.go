@@ -9,37 +9,38 @@ import (
 	"os"
 )
 
-func genRSAkey() (*rsa.PublicKey, *rsa.PrivateKey) {
-	PrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+func main() {
+
+	// Generate RSA Keys
+	pimPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	PublicKey := &PrivateKey.PublicKey
-	return PublicKey, PrivateKey
-}
+	pimPublicKey := &pimPrivateKey.PublicKey
 
-func main() {
+	roshanPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
-	user1PrivateKey := make([]string, 3)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	user1PublicKey := make([]string, 3)
+	roshanPublicKey := &roshanPrivateKey.PublicKey
 
-	user1PublicKey, user1PrivateKey = genRSAkey()
+	fmt.Println("Pim Private Key : ", pimPrivateKey)
+	fmt.Println("Pim Public key ", pimPublicKey)
+	fmt.Println("Roshan Private Key : ", roshanPrivateKey)
+	fmt.Println("Roshan Public key ", roshanPublicKey)
 
-	fmt.Println("user1 Private Key : ", user1PrivateKey)
-	fmt.Println("user1 Public key ", user1PublicKey)
-	fmt.Println("user2 Private Key : ", user2PrivateKey)
-	fmt.Println("user2 Public key ", user2PublicKey)
-
-	//Encrypt user1's Message
-	message := []byte("Hi user2")
+	//Encrypt pim's Message
+	message := []byte("Hi Roshan")
 	label := []byte("")
 	hash := sha256.New()
 
-	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, user2PublicKey, message, label)
+	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, roshanPublicKey, message, label)
 
 	if err != nil {
 		fmt.Println(err)
@@ -58,7 +59,7 @@ func main() {
 	pssh.Write(PSSmessage)
 	hashed := pssh.Sum(nil)
 
-	signature, err := rsa.SignPSS(rand.Reader, user1PrivateKey, newhash, hashed, &opts)
+	signature, err := rsa.SignPSS(rand.Reader, pimPrivateKey, newhash, hashed, &opts)
 
 	if err != nil {
 		fmt.Println(err)
@@ -68,7 +69,7 @@ func main() {
 	fmt.Printf("PSS Signature : %x\n", signature)
 
 	// Decrypt Message
-	plainText, err := rsa.DecryptOAEP(hash, rand.Reader, user2PrivateKey, ciphertext, label)
+	plainText, err := rsa.DecryptOAEP(hash, rand.Reader, roshanPrivateKey, ciphertext, label)
 
 	if err != nil {
 		fmt.Println(err)
@@ -78,7 +79,7 @@ func main() {
 	fmt.Printf("OAEP decrypted [%x] to \n[%s]\n", ciphertext, plainText)
 
 	//Verify Signature
-	err = rsa.VerifyPSS(user1PublicKey, newhash, hashed, signature, &opts)
+	err = rsa.VerifyPSS(pimPublicKey, newhash, hashed, signature, &opts)
 
 	if err != nil {
 		fmt.Println("Who are U? Verify Signature failed")
